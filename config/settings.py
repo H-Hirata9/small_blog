@@ -42,8 +42,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'corsheaders',
+    "taggit",
     # My apps
+    'knowledge.apps.KnowledgeConfig',
     'apiv1.apps.Apiv1Config',
+
 ]
 
 MIDDLEWARE = [
@@ -95,7 +98,7 @@ REST_FRAMEWORK = {
 
 ## Added for jwt
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
+    'AUTH_HEADER_TYPES': ('Bearer',),
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60)
 }
 
@@ -159,4 +162,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #  Auth user model settings
-AUTH_USER_MODEL = 'apiv1.MyUser'
+AUTH_USER_MODEL = 'knowledge.MyUser'

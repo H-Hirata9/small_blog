@@ -14,6 +14,8 @@ def post_file_dir(instance, filename):
     # file will be uploaded to MEDIA_ROOT/post_<id>/<filename>
     return f'post_{instance.post.id}/{filename}'
 
+
+
 class MyUserManager(BaseUserManager):
     def create_user(self, email, employee_id, password=None):
         """
@@ -63,11 +65,13 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    employee_id = models.CharField(max_length=7)
 
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = ('employee_id',)
+
 
     def __str__(self):
         return f"{self.email}"
@@ -88,7 +92,7 @@ class DepartmentCode(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dpt_code_updated_by', on_delete=models.CASCADE)
 
 
-    REQUIRED_FIELDS = ['department_code']
+    REQUIRED_FIELDS = ('department_code',)
 
     def __str__(self):
         return self.department_code
@@ -104,7 +108,7 @@ class Profile(models.Model):
                                 on_delete=models.CASCADE,
                                 primary_key=True)
     department = models.ManyToManyField("DepartmentCode", through="Belongs",
-                                        through_fields=("user", "department"))
+                                        through_fields=("profile", "department"))
 
     free_text = models.TextField(null=True)
 
@@ -123,7 +127,7 @@ class Belongs(models.Model):
         return f"{self.department}:{self.profile.user}"
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=["profile", "is_primary"],
                 name="const_prime_dpt",
@@ -133,7 +137,7 @@ class Belongs(models.Model):
                 fields=["profile", "department"],
                 name="const_dpt",
             ),
-        ]
+        )
         verbose_name_plural = "Belongs"
 
 
@@ -145,14 +149,12 @@ class Article(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     published_at = models.DateTimeField(null=True, blank=True)
-    like = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_likes',  blank=True,
-                                  on_delete=models.CASCADE)
-    follower = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_bookmarks',  blank=True,
-                                      on_delete=models.CASCADE)
+    like = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_likes',  blank=True)
+    follower = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_bookmarks',  blank=True)
     tags = TaggableManager()
 
 
-    REQUIRED_FIELDS = ['author', 'title', 'text']
+    REQUIRED_FIELDS = ('author', 'title', 'text',)
 
     def __str__(self):
         return self.title
@@ -192,10 +194,11 @@ class Comment(models.Model):
     ancestor = models.ForeignKey('self', related_name='descendants',
                                  on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    like = models.ManyToManyField(settings.AUTH_USER_MODEL, null=True, blank=True)
+    like = models.ManyToManyField(settings.AUTH_USER_MODEL,  blank=True)
 
 
-    REQUIRED_FIELDS = ['commenter', 'article', 'text']
+    REQUIRED_FIELDS = ('commenter', 'article', 'text', )
+
 
     def __str__(self):
         return f"{self.commenter}:{self.article.title}"
