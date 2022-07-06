@@ -148,7 +148,9 @@ class Article(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    published_at = models.DateTimeField(null=True, blank=True)
+    is_published = models.BooleanField(default=False)
+    initial_published_at  = models.DateTimeField(null=True, blank=True)
+    last_published_at = models.DateTimeField(null=True, blank=True)
     like = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_likes',  blank=True)
     follower = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_bookmarks',  blank=True)
     tags = TaggableManager()
@@ -159,16 +161,21 @@ class Article(models.Model):
     def __str__(self):
         return self.title
 
-    def publish(self):
-        self.published_at = timezone.now()
-        self.save()
+    def save(self, *args, **kwargs):
+        now = timezone.now()
+        if self.is_published:
+            if self.initial_published_at is None:
+                self.initial_published_at = now
+            self.last_published_at = now
+        else:
+            self.published_at = None
+        super().save(*args, **kwargs)
 
-    def make_a_draft(self):
-        self.published_at = None
-        self.save()
 
     class Meta:
         verbose_name_plural = "Articles"
+
+
 
 class ArticleImage(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE,
@@ -199,9 +206,19 @@ class Comment(models.Model):
 
     REQUIRED_FIELDS = ('commenter', 'article', 'text', )
 
-
     def __str__(self):
-        return f"{self.commenter}:{self.article.title}"
+        if len(self.text) > 10:
+            text = self.text[:11]
+        else:
+            text = self.text
+        return f"{self.article}:{self.commenter}:{text}"
+
+    def save(self, *args, **kwargs):
+        if self.ancestor:
+            self.article = self.ancestor.article
+        super().save(*args, **kwargs)
+
 
     class Meta:
         verbose_name_plural = "Comments"
+

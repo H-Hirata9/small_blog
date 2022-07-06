@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from knowledge.models import Article
-from .serializers import ArticleSerializer, ReadArticleSerializer
+from knowledge.models import Article, Comment
+from .serializers import ArticleSerializer, ReadArticleSerializer, CommentSerializer
 # Create your views here.
 
 class ArticleViewSet(viewsets.ModelViewSet):
@@ -15,3 +15,10 @@ class ArticleViewSet(viewsets.ModelViewSet):
           if self.request.method.lower() == "get":
                return self.read_serializer_class
           return self.serializer_class
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+     queryset = Comment.objects.all()
+     serializer_class = CommentSerializer
+     permission_classes = (IsAuthenticatedOrReadOnly, )
+

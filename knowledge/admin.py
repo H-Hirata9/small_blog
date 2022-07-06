@@ -16,9 +16,10 @@ class CommentInline(admin.StackedInline):
 
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ('id','author', 'title', 'text', 'created_at', 'updated_at',
-                    'published_at', 'tags',)
+                    'is_published', 'tags',)
     ordering = ('-updated_at',)
-    readonly_fields = ('id', 'created_at', 'updated_at', 'like', 'follower',)
+    readonly_fields = ('id', 'created_at', 'updated_at', 'like', 'follower',
+                       'initial_published_at','last_published_at',)
     inlines = (
         ArticleImageInline,
         ArticleAttachedFileInline,
