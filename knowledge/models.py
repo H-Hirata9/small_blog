@@ -85,7 +85,7 @@ class DepartmentCode(models.Model):
         unique=True,
         validators=[RegexValidator(regex=r'\d{3}')]
     )
-
+    name = models.CharField(max_length=32)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -95,23 +95,22 @@ class DepartmentCode(models.Model):
     REQUIRED_FIELDS = ('department_code',)
 
     def __str__(self):
-        return self.department_code
+        return f"{self.department_code}:{self.name}"
 
     class Meta:
-        verbose_name_plural = _("DepartmentCodes")
+        verbose_name_plural = "DepartmentCodes"
 
 
 class Profile(models.Model):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL,
                                 related_name='user_profile',
-                                on_delete=models.CASCADE,
-                                primary_key=True)
+                                on_delete=models.CASCADE,)
     department = models.ManyToManyField("DepartmentCode", through="Belongs",
                                         through_fields=("profile", "department"))
 
     free_text = models.TextField(null=True)
-
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 
