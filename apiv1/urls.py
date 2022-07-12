@@ -2,10 +2,11 @@ from django.urls import path, include
 from rest_framework import routers
 
 from .views import (ArticleViewSet, CommentViewSet, DepartmentCodeViewSet,
-                    ProfileViewSet, MyProfileListView, BelongsViewSet)
+                    ProfileViewSet, MyProfileListView, BelongsViewSet, ReadOnlyArticleViewSet)
 
 router = routers.DefaultRouter()
 router.register('article',ArticleViewSet)
+router.register('knowledge',ReadOnlyArticleViewSet)
 router.register('comment',CommentViewSet)
 router.register('profile',ProfileViewSet)
 router.register('department',DepartmentCodeViewSet)

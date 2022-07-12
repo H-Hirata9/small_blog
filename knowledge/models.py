@@ -112,6 +112,8 @@ class Profile(models.Model):
     free_text = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.user}"
 
 
 class Belongs(models.Model):
@@ -124,6 +126,11 @@ class Belongs(models.Model):
 
     def __str__(self):
         return f"{self.department}:{self.profile.user}"
+
+    def save(self, *args, **kwargs):
+        if self.end_date:
+            self.is_primary = False
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = (
@@ -153,6 +160,7 @@ class Article(models.Model):
     like = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_likes',  blank=True)
     follower = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='user_bookmarks',  blank=True)
     tags = TaggableManager()
+    allow_comment = models.BooleanField(default=True)
 
 
     REQUIRED_FIELDS = ('author', 'title', 'text',)
@@ -201,6 +209,7 @@ class Comment(models.Model):
                                  on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     like = models.ManyToManyField(settings.AUTH_USER_MODEL,  blank=True)
+    is_displayed = models.BooleanField(default=True)
 
 
     REQUIRED_FIELDS = ('commenter', 'article', 'text', )
@@ -217,7 +226,22 @@ class Comment(models.Model):
             self.article = self.ancestor.article
         super().save(*args, **kwargs)
 
-
     class Meta:
         verbose_name_plural = "Comments"
+
+class Announcement(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='announce_user', on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    start_date = models.DateTimeField(default=timezone.now)
+    end_date = models.DateTimeField(null=True)
+
+
+    REQUIRED_FIELDS = ('user', 'text', 'start_date', 'end_date', )
+
+    def __str__(self):
+        return f"{self.text}"
+
+    class Meta:
+        verbose_name_plural = "Announcements"
 

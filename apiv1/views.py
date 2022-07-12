@@ -8,6 +8,8 @@ from .serializers import (ArticleSerializer, ReadArticleSerializer, CommentSeria
 # Create your views here.
 
 
+
+
 class ProfileViewSet(viewsets.ModelViewSet):
      queryset = Profile.objects.all()
      serializer_class = ProfileSerializer
@@ -37,8 +39,8 @@ class BelongsViewSet(viewsets.ModelViewSet):
      serializer_class = BelongsSerializer
 
 
-
 class ArticleViewSet(viewsets.ModelViewSet):
+     # For author
      queryset = Article.objects.all()
      serializer_class = ArticleSerializer
      read_serializer_class = ReadArticleSerializer
@@ -52,11 +54,18 @@ class ArticleViewSet(viewsets.ModelViewSet):
      def perform_create(self, serializer):
           serializer.save(author=self.request.user)
 
+class ReadOnlyArticleViewSet(viewsets.ReadOnlyModelViewSet):
+     # For reader
+     queryset = Article.objects.filter(is_published=True)
+     serializer_class = ReadArticleSerializer
+     permission_classes = (IsAuthenticatedOrReadOnly, )
+
 
 class CommentViewSet(viewsets.ModelViewSet):
      queryset = Comment.objects.all()
      serializer_class = CommentSerializer
      permission_classes = (IsAuthenticatedOrReadOnly, )
+
 
      def perform_create(self, serializer):
           serializer.save(commenter=self.request.user)

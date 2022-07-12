@@ -38,14 +38,14 @@ class BelongsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Belongs
-        fields = ('id','department','profile','is_primary', 'start_date', 'end_date',)
+        fields = ('id', 'department', 'profile', 'is_primary', 'start_date', 'end_date',)
 
 class ProfileSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
 
     class Meta:
         model = Profile
-        fields = ('department','user', 'created_at', 'free_text')
+        fields = ('department', 'user', 'created_at', 'free_text')
         extra_kwargs = {
             'user': {'read_only': True},
             'department': {'read_only': True}
@@ -53,9 +53,17 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+
+    def validate_article(self, value):
+        """
+        Check that the blog post is about Django.
+        """
+        if not value.allow_comment:
+            raise serializers.ValidationError("The article author does NOT accept any comment currently.")
+        return value
     class Meta:
         model = Comment
-        fields = ('id','commenter', 'article' ,'ancestor','created_at', 'like', 'text')
+        fields = ('id', 'commenter', 'article' , 'ancestor', 'created_at', 'like', 'text')
         extra_kwargs = {
             "commenter" : {"read_only": True},
         }
@@ -72,9 +80,9 @@ class ReadArticleSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ('id', 'title', 'text', 'author', 'tags','article_images','created_at',
-                  'updated_at', 'is_published','initial_published_at','last_published_at',
-                  'comments', 'like', )
+        fields = ('id', 'title', 'text', 'author', 'tags', 'article_images', 'created_at',
+                  'updated_at', 'is_published', 'initial_published_at', 'last_published_at',
+                  'comments', 'like', 'allow_comment', )
         extra_kwargs = {
             "author" : {"read_only": True}
         }
@@ -91,7 +99,7 @@ class ArticleSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Article
         fields = ('id', 'title', 'text', 'author', 'tags','article_images','created_at',
                   'updated_at', 'is_published','initial_published_at','last_published_at',
-                   'like')
+                   'like', 'allow_comment',)
         extra_kwargs = {
             "author" : {"read_only": True},
         }
