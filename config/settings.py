@@ -79,10 +79,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'config.urls'
 
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",
-]
-
+CORS_ORIGIN_WHITELIST = env.list('CORS_ORIGIN_WHITELIST')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -107,7 +104,8 @@ REST_FRAMEWORK = {
       'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'django_auth_adfs.rest_framework.AdfsAccessTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning'
 }
@@ -118,7 +116,17 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60)
 }
 
+##
+AUTHENTICATION_BACKENDS = (
+    'django_auth_adfs.backend.AdfsAccessTokenBackend',
+)
 
+
+AUTH_ADFS = {
+    'LOGIN_EXEMPT_URLS': [
+        '^apiv1',  # Assuming you API is available at /api
+    ],
+}
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 #
